@@ -1,0 +1,39 @@
+---
+title: "Online Pre-Registration System"
+author: "Marivic Amuan, Nicole De Luna, Reysha Marie Salinas BSIT 2-C"
+date: "2024-04-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Read the responses.
+
+```{r}
+library(readr)
+library(dplyr)
+library(readxl)
+
+response <- read_excel ("response.xlsx")
+View(response)
+```
+
+View data types of each columns.
+
+```{r}
+str(response)
+```
+
+Mean of each column.
+
+```{r}
+numeric_col <- sapply(response, is.numeric) #get only the numeric columns.
+response_numeric <- response [, numeric_col]
+
+col_means <- colMeans (response_numeric)
+col_means
+```
+
