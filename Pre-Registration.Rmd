@@ -147,8 +147,216 @@ ggplot(yearSec_df, aes(x = Var1, y = Freq)) +
 Create data frame for questions.
 ```{r}
 #Create data frame for questions.
-questions_column <- response[, 10:40]
+  questions_column <- response[, 10:39]
+write_csv(questions_column, file = "questions.csv")
+
+#read survey
+data <- read.csv("questions.csv")
+
+#mean of all survey questions
+numeric_cols <- sapply(data, is.numeric)
+
+means <- colMeans(data[, numeric_cols], na.rm = TRUE)
+
+colnames(data)[numeric_cols]  
+
+all_means <-mean(means)
+
+#mean of the suvey question is  2.516013
+
 ```
+--------Mean and Standard Deviation-----
+Performance Expectancy
+```{r}
+# Read the data 
+data <- read.csv("questions.csv")
+
+columns <- data[, 1:4]  
+
+# Calculate the mean and standard deviation
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means :\n", mean)
+
+#Means  Performance Expectancy
+ #2.421569
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations /Performance Expectancy
+# 0.05125617
+
+```
+Effort Expectancy
+```{r}
+# Read the data 
+data <- read.csv("questions.csv")
+
+columns <- data[, 5:8]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means :\n", mean)
+
+#Means for Effort Expectancy
+ #2.514706
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Effort Expectancy
+ #0.06862745
+
+```
+Attitude Toward Using Technology
+```{r}
+# Read the data 
+data <- read.csv("questions.csv")
+
+columns <- data[, 9:12]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means:\n", mean)
+
+#Means for Attitude Toward Using Technology
+ # 2.473039
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Attitude Toward Using Technology
+ #0.04411765
+```
+Social influence
+```{r}
+
+columns <- data[, 13:16]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means:\n", mean)
+
+#Means for Social influence
+ #  2.54902
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Social influence
+ #0.06252002
+```
+Facilitating Conditions
+```{r}
+
+columns <- data[, 17:20]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means:\n", mean)
+
+#Means for Facilitating Conditions
+ #2.477941
+
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Facilitating Conditions
+ #0.05023015
+```
+Self-Efficacy
+```{r}
+
+columns <- data[, 21:24]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means:\n", mean)
+
+#Means for Self-Efficacy
+ # 2.544118
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Self-Efficacy
+ #0.09214296
+```
+Anxiety
+```{r}
+
+columns <- data[, 25:28]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means:\n", mean)
+
+#Means for Anxiety
+ # 2.632353
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Anxiety
+ #0.0404226
+```
+Behavioral Intention to Use the System
+```{r}
+
+columns <- data[, 29:30]  
+
+# Calculate the mean and standard deviation 
+performance <- colMeans(columns) 
+stds <- apply(columns, 2, sd)  
+
+mean <-mean(performance)
+stds <- sd(performance)
+
+cat("Means:\n", mean)
+
+#Means for Behavioral Intention to Use the System
+ #  2.514706
+
+
+cat("\nStandard Deviations:\n", stds)
+
+#Standard Deviations for Behavioral Intention to Use the System
+ # 0.02079726
+```
+
 
 
 
