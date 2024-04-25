@@ -10,30 +10,145 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-Read the responses.
+load/Read the responses.
 
-```{r}
+```{r eval=FALSE}
 library(readr)
 library(dplyr)
 library(readxl)
 
 response <- read_excel ("response.xlsx")
 View(response)
+summary(response)
 ```
 
-View data types of each columns.
-
+----------DEMOGRAPHICS--------------
+Demographics: Gender 
 ```{r}
-str(response)
+gender <- table(response$Gender)  # Creates a frequency table
+
+gender <- as.data.frame(gender)  # Converts to a data frame
+
+gender  # View the data frame (optional)
+
+ggplot(gender, aes(x = Var1, y = Freq)) +  
+  geom_bar(stat = "identity") +  
+  labs(title = "Distribution of Gender",  
+       x = "Gender",
+       y = "Frequency") +
+  theme_classic() 
+
+  ggsave("gender_Demographics.png") 
+
+ 
 ```
-
-Mean of each column.
-
+Demographics:Age
 ```{r}
-numeric_col <- sapply(response, is.numeric) #get only the numeric columns.
-response_numeric <- response [, numeric_col]
+age <- table(response$Age)
 
-col_means <- colMeans (response_numeric)
-col_means
+age <- as.data.frame(age)
+age
+
+ggplot(age, aes(x = factor(Var1), y = Freq)) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Age of Respondent", x = "Age Group", y = "Frequency") 
+
+
+   ggsave("age_Demographics.png") 
 ```
+Demographics:School 
+```{r}
+library(dplyr)
+library(ggplot2)  
+
+
+school_data <- response$School 
+schooldf <- data.frame(school = school_data)
+
+schooldf$school <- toupper(trimws(schooldf$school))  
+
+
+school_counts <- schooldf %>%
+  group_by(school) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))  
+
+
+ggplot(school_counts, aes(x = factor(school), y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "School of Respondents", x = "School", y = "Frequency") +
+  theme(axis.text.x = element_text(angle = 55, hjust = 1))
+
+ggsave("school_Demographics.png", width = 20, height = 10) 
+```
+Demographics:Time
+```{r}
+time <-table(response$Timestamp)
+
+time <- as.data.frame(time)
+
+time$Var1 <- strptime(time$Var1, format = "%Y-%m-%d %H:%M:%S")  # Parse timestamps
+time$Var1 <- format(time$Var1, format = "%b %d, %Y %H:%M") 
+
+ggplot(time, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity") +  
+  labs(title = "Frequency of Timestamps", x = "Timestamp", y = "Frequency") +
+  theme(axis.text.x = element_text(angle =90, hjust = ,  size = 5)) 
+
+
+  ggsave("timestamp_Demographics.png")  #SAVE PNG
+  
+```
+Demographics:Department&course
+```{r}
+department<-table(response$`Department&course`)
+
+
+# table to a data frame 
+department_df <- as.data.frame(department)
+department_df <- department_df %>%
+  mutate(Department_Course = rownames(department_df))  
+
+#bar chart
+ggplot(department_df, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity") + 
+  labs(title = "Frequency of Department and Course Combinations",
+       x = "Department & Course",  
+       y = "Frequency") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) 
+
+# Display the chart
+ ggsave("Department&course_Demographics.png")  
+
+```
+Demographics:Year&Section
+```{r}
+yearSec <- table(response$`Year&Section`)
+
+yearSec_df <- as.data.frame(yearSec)
+yearSec_df <- yearSec_df %>%
+  mutate(Year_Section = rownames(yearSec_df))  
+
+
+ggplot(yearSec_df, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity") +  
+  labs(title = "Frequency of Year and Section Combinations",
+       x = "Year & Section", 
+       y = "Frequency") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) 
+
+
+  ggsave("Year&Section_Demographics.png")
+```
+
+----------DETERMINANT----------------
+Create data frame for questions.
+```{r}
+#Create data frame for questions.
+questions_column <- response[, 10:40]
+```
+
+
 
