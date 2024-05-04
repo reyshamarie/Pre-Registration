@@ -16,6 +16,7 @@ load/Read the responses.
 library(readr)
 library(dplyr)
 library(readxl)
+library(ggplot2)
 
 response <- read_excel ("response.xlsx")
 View(response)
@@ -25,18 +26,18 @@ summary(response)
 ----------DEMOGRAPHICS--------------
 Demographics: Gender 
 ```{r}
-gender <- table(response$Gender)  # Creates a frequency table
+gender <- table(response$Gender)  
+gender <- as.data.frame(gender)  #dataframe
 
-gender <- as.data.frame(gender)  # Converts to a data frame
-
-gender  # View the data frame (optional)
+gender  
 
 ggplot(gender, aes(x = Var1, y = Freq)) +  
   geom_bar(stat = "identity") +  
   labs(title = "Distribution of Gender",  
        x = "Gender",
        y = "Frequency") +
-  theme_classic() 
+  theme_classic() +
+  scale_fill_manual(values = c("blue", "pink"))
 
   ggsave("gender_Demographics.png") 
 
@@ -62,16 +63,13 @@ library(dplyr)
 library(ggplot2)  
 
 
-school_data <- response$School 
-schooldf <- data.frame(school = school_data)
-
-schooldf$school <- toupper(trimws(schooldf$school))  
+schooldf <- data.frame(school = tolower(gsub("[ -]", "", response$School)))
 
 
-school_counts <- schooldf %>%
-  group_by(school) %>%
+schools_grouped <- schooldf %>%
+  group_by(school) %>%   
   summarise(count = n()) %>%
-  arrange(desc(count))  
+  arrange(desc(count))
 
 
 ggplot(school_counts, aes(x = factor(school), y = count)) +
@@ -101,15 +99,15 @@ ggplot(time, aes(x = Var1, y = Freq)) +
 ```
 Demographics:Department&course
 ```{r}
-department<-table(response$`Department&course`)
+#clean data
+response$DepartmentCourse <- tolower(gsub("[ -]", "", response$`Department&course`))
+
+# Create data frame
+department_df <- table(response$DepartmentCourse) %>%
+  as.data.frame() %>%
+  mutate(Department_Course = rownames(.))   
 
 
-# table to a data frame 
-department_df <- as.data.frame(department)
-department_df <- department_df %>%
-  mutate(Department_Course = rownames(department_df))  
-
-#bar chart
 ggplot(department_df, aes(x = Var1, y = Freq)) +
   geom_bar(stat = "identity") + 
   labs(title = "Frequency of Department and Course Combinations",
@@ -119,17 +117,19 @@ ggplot(department_df, aes(x = Var1, y = Freq)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) 
 
 # Display the chart
- ggsave("Department&course_Demographics.png")  
+ 
+ggsave("Department&course_Demographics.png")  
 
 ```
 Demographics:Year&Section
 ```{r}
-yearSec <- table(response$`Year&Section`)
+#update clean data 
+response$YearSection <- tolower(gsub("[ -]", "", response$`Year&Section`))
 
-yearSec_df <- as.data.frame(yearSec)
-yearSec_df <- yearSec_df %>%
-  mutate(Year_Section = rownames(yearSec_df))  
 
+yearSec_df <- table(response$YearSection) %>%
+  as.data.frame() %>%
+  mutate(Year_Section = rownames(.))  
 
 ggplot(yearSec_df, aes(x = Var1, y = Freq)) +
   geom_bar(stat = "identity") +  
@@ -148,24 +148,11 @@ Create data frame for questions.
 ```{r}
 #Create data frame for questions.
   questions_column <- response[, 10:39]
-write_csv(questions_column, file = "questions.csv")
-
-#read survey
-data <- read.csv("questions.csv")
-
-#mean of all survey questions
-numeric_cols <- sapply(data, is.numeric)
-
-means <- colMeans(data[, numeric_cols], na.rm = TRUE)
-
-colnames(data)[numeric_cols]  
-
-all_means <-mean(means)
-
-#mean of the suvey question is  2.516013
+  write.csv(questions_column, file = "questions.csv")
 
 ```
 --------Mean and Standard Deviation-----
+
 Performance Expectancy
 ```{r}
 # Read the data 
@@ -357,6 +344,87 @@ cat("\nStandard Deviations:\n", stds)
  # 0.02079726
 ```
 
+MEAN and STANDARD DEVIATION of each CATEGORY
+```{r}
+#data frame to store the means and standard deviations
+  datacategory <- data.frame(
+  Category = c("Performance Expectancy", "Effort Expectancy", "Attitude Toward Using Technology",
+                "Social Influence", "Facilitating Conditions", "Self-Efficacy",
+                "Anxiety", "Behavioral Intention to Use the System"),
+  Mean = c(2.421569, 2.514706, 2.473039, 2.54902, 2.477941, 2.544118, 2.632353, 2.514706),
+  Standard_Deviation = c(0.05125617, 0.06862745, 0.04411765, 0.06252002, 0.05023015, 0.09214296, 0.0404226, 0.02079726)
+)
+  datacategory #view
+  #save csv
+ write.csv(datacategory, "categorymeanStandarddev.csv") 
 
 
+library(ggplot2)
+
+#bar plot with means and standard deviations
+bar_plot <- ggplot(summary_data, aes(x = Construct, y = Mean)) +
+  geom_bar(stat = "identity", fill = "green", alpha = 0.7) +
+  geom_errorbar(aes(ymin = Mean - Standard_Deviation, ymax = Mean + Standard_Deviation), width = 0.4, color = "black", alpha = 0.7) +
+  labs(title = "Means and Standard Deviations",
+       x = "Category",
+       y = "Rating Scale") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the bar plot
+print(bar_plot)
+
+ggsave("categoryMeansStd.png")
+```
+MEAN and STANDARD DEVIATION of each column
+```{r}
+# Read data from CSV file
+data <- read.csv("questions.csv")
+
+performance <- data[, 1:4]  # Performance Expectancy
+effort <- data[, 5:8]        # Effort Expectancy
+attitude <- data[, 9:12]     # Attitude Toward Using Technology
+social <- data[, 13:16]      # Social Influence
+facilitating <- data[, 17:20]# Facilitating Conditions
+self <- data[, 21:24]       # Self-Efficacy
+anxiety <- data[, 25:28]    # Anxiety
+behavioral <- data[, 29:30] # Behavioral Intention to Use the System
+
+
+calculate_summary <- function(category) {
+  mean_values <- colMeans(category)
+  std_values <- apply(category, 2, sd)
+  return(data.frame(Category = colnames(category), Mean = mean_values, StandardDeviation = std_values))
+}
+
+#mean and standard deviation for each category
+performance_summary <- calculate_summary(performance)
+effort_summary <- calculate_summary(effort)
+attitude_summary <- calculate_summary(attitude)
+social_summary <- calculate_summary(social)
+facilitating_summary <- calculate_summary(facilitating)
+self_summary <- calculate_summary(self)
+anxiety_summary <- calculate_summary(anxiety)
+behavioral_summary <- calculate_summary(behavioral)
+
+# summaries into one data frame
+all_summaries <- rbind(performance_summary, effort_summary, attitude_summary, social_summary, facilitating_summary, self_summary, anxiety_summary, behavioral_summary)
+
+#combined summary
+print(all_summaries)
+
+# mean and standard deviation for each category
+for (category in unique(all_summaries$Category)) {
+  category_data <- subset(all_summaries, Category == category)
+  barplot(height = c(category_data$Mean, category_data$StandardDeviation), beside = TRUE, ylim = range(c(category_data$Mean, category_data$StandardDeviation)) * c(0.9, 1.1),
+          names.arg = c("Mean", "Standard Deviation"),
+          main = paste("Mean and Standard Deviation of", category),
+          col = c("yellow", "orange"),
+          xlab = ,
+          ylab = ,
+           cex.axis = 0.8,  
+          cex.lab = 0.9,   
+          cex.main = 0.6)
+}
+
+```
 
